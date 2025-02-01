@@ -11,7 +11,8 @@ namespace p_client
         /// <summary>
         /// Punto de entrada principal para la aplicación.
         /// </summary>
-        /// no se xd
+        /// Ayuda, como se trabajaba en c#
+        /// pinche visual studio, no recuerdo como programar aquí xd
         [STAThread]
         static void Main()
         {
