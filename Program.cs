@@ -11,6 +11,7 @@ namespace p_client
         /// <summary>
         /// Punto de entrada principal para la aplicación.
         /// </summary>
+        /// no se xd
         [STAThread]
         static void Main()
         {
