@@ -34,21 +34,21 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(304, 235);
+            this.button1.Location = new System.Drawing.Point(244, 171);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(190, 69);
+            this.button1.Size = new System.Drawing.Size(253, 62);
             this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
+            this.button1.Text = "hola";
             this.button1.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(413, 144);
+            this.label1.Location = new System.Drawing.Point(319, 97);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(33, 16);
+            this.label1.Size = new System.Drawing.Size(63, 16);
             this.label1.TabIndex = 1;
-            this.label1.Text = "hola";
+            this.label1.Text = "prueba :3";
             // 
             // Form1
             // 
