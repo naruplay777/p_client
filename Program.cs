@@ -11,6 +11,9 @@ namespace p_client
         /// <summary>
         /// Punto de entrada principal para la aplicación.
         /// </summary>
+        /// Ayuda, como se trabajaba en c#
+        /// pinche visual studio, no recuerdo como programar aquí xd
+        /// mondongo
         [STAThread]
         static void Main()
         {

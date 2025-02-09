@@ -12,20 +12,32 @@ namespace p_client
 {
     public partial class Form1 : Form
     {
-
         public Form1()
         {
             InitializeComponent();
+            client.Connect("127.0.0.1", 5000);
+            stream = client.GetStream();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-         
+
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (stream != null)
+            {
+                string disconnectMessage = "Cliente desconectado";
+                byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
+                stream.Write(data, 0, data.Length);
 
+                stream.Close();
+            }
+            if (client != null)
+            {
+                client.Close();
+            }
         }
 
         private void label1_Click(object sender, EventArgs e)
