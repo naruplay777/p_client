@@ -79,7 +79,7 @@
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(-34, -2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1124, 69);
+            this.panel1.Size = new System.Drawing.Size(1089, 69);
             this.panel1.TabIndex = 2;
             // 
             // openFileDialog1
@@ -119,6 +119,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(213, 22);
             this.textBox1.TabIndex = 5;
+            this.textBox1.Click += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button3
             // 
@@ -133,7 +134,6 @@
             this.button3.TabIndex = 6;
             this.button3.Text = "Desconectar servidor";
             this.button3.UseVisualStyleBackColor = false;
-           //his.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // panel2
             // 
@@ -159,7 +159,6 @@
             this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(416, 129);
             this.textBox2.TabIndex = 10;
-            //is.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // label6
             // 
@@ -235,6 +234,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load_1);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
