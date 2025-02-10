@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,7 +29,7 @@ namespace p_client
 
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e) //Editar desconexion, no funcioa bien
         {
             if (stream != null)
             {
@@ -54,29 +55,14 @@ namespace p_client
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            string message = textBox1.Text;
-            byte[] data = Encoding.ASCII.GetBytes(message);
-            stream.Write(data, 0, data.Length);
-
-            byte[] responseData = new byte[256];
-            int bytes = stream.Read(responseData, 0, responseData.Length);
-            string response = Encoding.ASCII.GetString(responseData, 0, bytes);
-            label1.Text = response;
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Filter = "Archivos de texto (*.txt)|*.txt";
-            openFileDialog1.Title = "Seleccionar archivo de texto";
-            openFileDialog1.InitialDirectory = @"C:\MisDocumentos"; // Reemplaza con la ruta deseada
-
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string nombreArchivo = openFileDialog1.FileName;
-                textBox1.Text = nombreArchivo;
-
+                string filePath = openFileDialog.FileName;
+                SendFile(filePath);
             }
         }
 
@@ -97,6 +83,13 @@ namespace p_client
             MessageBox.Show("Conexión cerrada", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             this.Close();
+        }
+
+        private void SendFile(string filePath)
+        {
+            byte[] fileData = File.ReadAllBytes(filePath);
+            stream.Write(fileData, 0, fileData.Length);
+            MessageBox.Show("Archivo enviado", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
