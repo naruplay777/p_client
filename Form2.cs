@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,7 +27,10 @@ namespace p_client
         {
             try
             {
-                // código para conectar con el servidor
+                string direccionServidor = "127.0.0.1"; 
+                int puertoServidor = 5000;
+
+                TcpClient cliente = new TcpClient(direccionServidor, puertoServidor);
                 MessageBox.Show("Conexión establecida con el servidor.");
                 Form1 form1 = new Form1();
                 form1.Show();
@@ -36,6 +40,16 @@ namespace p_client
             {
                 MessageBox.Show("Error al conectar: " + ex.Message);
             }
+        }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

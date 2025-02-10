@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Sockets;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace p_client
 {
@@ -16,12 +17,15 @@ namespace p_client
     {
         TcpClient client = new TcpClient();
         NetworkStream stream;
+        private OpenFileDialog openFileDialog;
 
         public Form1()
         {
             InitializeComponent();
             client.Connect("127.0.0.1", 5000);
             stream = client.GetStream();
+            openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -57,12 +61,11 @@ namespace p_client
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string filePath = openFileDialog.FileName;
                 SendFile(filePath);
+                textBox1_TextChanged_1(sender, e);
             }
         }
 
@@ -94,13 +97,31 @@ namespace p_client
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void Form1_Load_1(object sender, EventArgs e)
         {
 
         }
-    }
 
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+      
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+            string filePath = openFileDialog.FileName;
+            string contenido = File.ReadAllText(filePath);
+            textBox1.Text = contenido;
+        }
+    }
 }
