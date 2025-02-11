@@ -9,54 +9,37 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Sockets;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace p_client
 {
     public partial class Form1 : Form
     {
-        TcpClient client = new TcpClient();
+        TcpClient client;
         NetworkStream stream;
         private OpenFileDialog openFileDialog;
+        private Form2 form2; 
 
-        public Form1()
+        public Form1(TcpClient client, NetworkStream stream, Form2 form2)
         {
             InitializeComponent();
-            client.Connect("127.0.0.1", 5000);
-            stream = client.GetStream();
+            this.client = client;
+            this.stream = stream;
+            this.form2 = form2;
             openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e) //Editar desconexion, no funcioa bien
-        {
-            if (stream != null)
-            {
-                string disconnectMessage = "Cliente desconectado";
-                byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
-                stream.Write(data, 0, data.Length);
-
-                stream.Close();
-            }
-            if (client != null)
-            {
-                client.Close();
-            }
+            MessageBox.Show("Conectado al servidor", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void label1_Click(object sender, EventArgs e)
         {
-
         }
 
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
-
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -71,21 +54,30 @@ namespace p_client
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (stream != null)
+            try
             {
-                string disconnectMessage = "Cliente desconectado";
-                byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
-                stream.Write(data, 0, data.Length);
+                if (stream != null)
+                {
+                    string disconnectMessage = "Cliente desconectado";
+                    byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
+                    stream.Write(data, 0, data.Length);
 
-                stream.Close();
+                    stream.Flush();
+                }
+                if (client != null)
+                {
+                    stream.Close();
+                    client.Close();
+                }
             }
-            if (client != null)
+            catch (Exception ex)
             {
-                client.Close();
+                MessageBox.Show($"Error al cerrar la conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
             MessageBox.Show("Conexión cerrada", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
             this.Close();
+            form2.Show();
         }
 
         private void SendFile(string filePath)
@@ -97,25 +89,19 @@ namespace p_client
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-
         }
 
         private void Form1_Load_1(object sender, EventArgs e)
         {
-
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-
         }
 
         private void label5_Click(object sender, EventArgs e)
         {
-
         }
-
-      
 
         private void textBox1_TextChanged_1(object sender, EventArgs e)
         {

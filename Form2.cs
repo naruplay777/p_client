@@ -13,6 +13,9 @@ namespace p_client
 {
     public partial class Form2 : Form
     {
+        private TcpClient client;
+        private NetworkStream stream;
+
         public Form2()
         {
             InitializeComponent();
@@ -20,19 +23,19 @@ namespace p_client
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             try
             {
-                string direccionServidor = "127.0.0.1"; 
+                string direccionServidor = "127.0.0.1";
                 int puertoServidor = 5000;
 
-                TcpClient cliente = new TcpClient(direccionServidor, puertoServidor);
+                client = new TcpClient(direccionServidor, puertoServidor);
+                stream = client.GetStream();
                 MessageBox.Show("Conexión establecida con el servidor.");
-                Form1 form1 = new Form1();
+                Form1 form1 = new Form1(client, stream, this); // Pasar this (Form2)
                 form1.Show();
                 this.Hide();
             }
@@ -44,12 +47,10 @@ namespace p_client
 
         private void Form2_Load(object sender, EventArgs e)
         {
-
         }
 
         private void panel2_Paint(object sender, PaintEventArgs e)
         {
-
         }
     }
 }
