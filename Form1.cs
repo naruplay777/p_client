@@ -29,6 +29,7 @@ namespace p_client
             this.form2 = form2;
             openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
+           
         }
 
         private async Task MonitorConnection()
@@ -119,12 +120,9 @@ namespace p_client
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
                 string filePath = openFileDialog.FileName;
                 SendFile(filePath);
                 textBox1_TextChanged_1(sender, e);
-            }
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -175,6 +173,20 @@ namespace p_client
             string filePath = openFileDialog.FileName;
             string contenido = File.ReadAllText(filePath);
             textBox1.Text = contenido;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string filePath = openFileDialog.FileName;
+                textBox2.Text = Path.GetFileName(filePath);
+            }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
