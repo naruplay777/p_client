@@ -16,6 +16,8 @@ namespace p_client
     {
         TcpClient client;
         NetworkStream stream;
+
+        private Task monitorConnectionTask;
         private OpenFileDialog openFileDialog;
         private Form2 form2; 
 
@@ -29,10 +31,83 @@ namespace p_client
             openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
         }
 
+        private async Task MonitorConnection()
+        {
+            try
+            {
+                while (client.Connected)
+                {
+                    // Intentamos leer de la corriente para ver si la conexión sigue activa
+                    byte[] buffer = new byte[1];
+                    try
+                    {
+                        // Si no podemos leer del stream, se ha perdido la conexión
+                        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                        if (bytesRead == 0) // Si no leemos nada, la conexión está cerrada
+                        {
+                            DisconnectClient();
+                            break;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Si ocurre una excepción, significa que la conexión se ha perdido
+                        DisconnectClient();
+                        break;
+                    }
+
+                    // Espera un poco antes de volver a verificar
+                    await Task.Delay(1000); // 1 segundo de espera
+                }
+            }
+            catch (Exception ex)
+            {
+                // Si algo falla, desconectamos de forma segura
+                DisconnectClient();
+            }
+        }
+
+        private void DisconnectClient()
+        {
+            try
+            {
+                // Enviar un mensaje de desconexión (opcional)
+                if (stream != null)
+                {
+                    string disconnectMessage = "Cliente desconectado";
+                    byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
+                    stream.Write(data, 0, data.Length);
+                    stream.Flush();
+                }
+
+                // Cerrar todo de forma segura
+                if (client != null)
+                {
+                    stream.Close();
+                    client.Close();
+                }
+
+                // Actualizar la interfaz de usuario
+                this.Invoke((MethodInvoker)delegate
+                {
+                    form2.Show(); // Regresar al formulario principal
+                    this.Close();  // Cerrar el formulario actual
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al desconectar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
             MessageBox.Show("Conectado al servidor", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // Iniciar la tarea para monitorear la conexión
+            monitorConnectionTask = Task.Run(() => MonitorConnection());
         }
+
 
         private void label1_Click(object sender, EventArgs e)
         {
@@ -85,14 +160,6 @@ namespace p_client
             byte[] fileData = File.ReadAllBytes(filePath);
             stream.Write(fileData, 0, fileData.Length);
             MessageBox.Show("Archivo enviado", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-        }
-
-        private void Form1_Load_1(object sender, EventArgs e)
-        {
         }
 
         private void button4_Click(object sender, EventArgs e)
