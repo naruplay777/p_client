@@ -92,6 +92,13 @@ namespace p_client
         private void button2_Click(object sender, EventArgs e)
         {
             string filePath = openFileDialog.FileName;
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                MessageBox.Show("Por favor, seleccione un archivo antes de enviar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             SendFile(filePath);
             textBox1_TextChanged_1(sender, e);
         }
