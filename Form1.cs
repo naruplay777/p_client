@@ -70,8 +70,6 @@ namespace p_client
 
         private void DisconnectClient()
         {
-            try
-            {
                 // Enviar un mensaje de desconexión (opcional)
                 if (stream != null)
                 {
@@ -94,11 +92,6 @@ namespace p_client
                     form2.Show(); // Regresar al formulario principal
                     this.Close();  // Cerrar el formulario actual
                 });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al desconectar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -139,8 +132,8 @@ namespace p_client
                 }
                 if (client != null)
                 {
-                    stream.Close();
                     client.Close();
+                    stream.Close();
                 }
             }
             catch (Exception ex)
