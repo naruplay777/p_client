@@ -17,9 +17,10 @@ namespace p_client
         TcpClient client;
         NetworkStream stream;
 
-        private Task monitorConnectionTask;
         private OpenFileDialog openFileDialog;
-        private Form2 form2; 
+        private Form2 form2;
+        private System.Windows.Forms.Timer connectionTimer;
+        private bool connectionLostMessageShown = false; // Bandera para controlar el mensaje
 
         public Form1(TcpClient client, NetworkStream stream, Form2 form2)
         {
@@ -29,72 +30,56 @@ namespace p_client
             this.form2 = form2;
             openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Archivos de texto (*.txt)|*.txt";
-           
+
+            connectionTimer = new System.Windows.Forms.Timer();
+            connectionTimer.Interval = 500;
+            connectionTimer.Tick += ConnectionTimer_Tick;
         }
 
-        private void MonitorConnection()
+        private void ConnectionTimer_Tick(object sender, EventArgs e)
         {
-            try
-            {
-                while (client.Connected)
-                {
-                    // Revisamos si la conexión sigue activa
-                    if (!IsConnectionAlive())
-                    {
-                        Invoke((MethodInvoker)delegate
-                        {
-                            MessageBox.Show("Conexión perdida. Volviendo a Form2.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            this.Close(); // Cerrar Form1
-                            form2.Show(); // Mostrar Form2
-                        });
-                        break;
-                    }
+            _ = CheckConnection();
+        }
 
-                    System.Threading.Thread.Sleep(500); // Esperamos medio segundo antes de volver a verificar
-                }
-            }
-            catch (Exception ex)
+        private async Task CheckConnection()
+        {
+            if (!await IsConnectionAliveAsync() && !connectionLostMessageShown)
             {
-                // En caso de error en la verificación, cerramos la conexión y mostramos el mensaje
+                connectionLostMessageShown = true; // Marcar que el mensaje ya ha sido mostrado
+                connectionTimer.Stop();
                 Invoke((MethodInvoker)delegate
                 {
-                    MessageBox.Show($"Error en la conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Conexión perdida. Volviendo a Form2.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     this.Close();
                     form2.Show();
                 });
             }
         }
 
-        private bool IsConnectionAlive()
+        private async Task<bool> IsConnectionAliveAsync()
         {
             try
             {
-                // Intentar leer un byte del stream para verificar si la conexión sigue activa
-                if (stream.CanRead)
+                if (stream != null && stream.CanRead)
                 {
                     byte[] buffer = new byte[1];
-                    stream.Read(buffer, 0, buffer.Length);
-                    return true; // Si podemos leer, la conexión está activa
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    return bytesRead > 0;
                 }
-                return false; // Si no podemos leer, la conexión está cerrada
+                return false;
             }
-            catch
+            catch (Exception ex)
             {
-                return false; // En caso de excepción, asumimos que la conexión está cerrada
+                Console.WriteLine($"Error en IsConnectionAliveAsync: {ex.Message}");
+                return false;
             }
         }
-
-
 
         private void Form1_Load(object sender, EventArgs e)
         {
             MessageBox.Show("Conectado al servidor", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Iniciar la tarea para monitorear la conexión
-            monitorConnectionTask = Task.Run(() => MonitorConnection());
+            connectionTimer.Start();
         }
-
-
 
         private void label1_Click(object sender, EventArgs e)
         {
@@ -106,9 +91,9 @@ namespace p_client
 
         private void button2_Click(object sender, EventArgs e)
         {
-                string filePath = openFileDialog.FileName;
-                SendFile(filePath);
-                textBox1_TextChanged_1(sender, e);
+            string filePath = openFileDialog.FileName;
+            SendFile(filePath);
+            textBox1_TextChanged_1(sender, e);
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -120,23 +105,27 @@ namespace p_client
                     string disconnectMessage = "Cliente desconectado";
                     byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
                     stream.Write(data, 0, data.Length);
-
                     stream.Flush();
-                }
-                if (client != null)
-                {
-                    stream.Close();
-                    client.Close();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cerrar la conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al enviar mensaje de desconexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            MessageBox.Show("Conexión cerrada", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.Close();
-            form2.Show();
+            finally
+            {
+                if (stream != null)
+                {
+                    stream.Close();
+                }
+                if (client != null)
+                {
+                    client.Close();
+                }
+                MessageBox.Show("Conexión cerrada", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
+                form2.Show();
+            }
         }
 
         private void SendFile(string filePath)
@@ -156,9 +145,12 @@ namespace p_client
 
         private void textBox1_TextChanged_1(object sender, EventArgs e)
         {
-            string filePath = openFileDialog.FileName;
-            string contenido = File.ReadAllText(filePath);
-            textBox1.Text = contenido;
+            if (openFileDialog.FileName != "") //Check if file is selected
+            {
+                string filePath = openFileDialog.FileName;
+                string contenido = File.ReadAllText(filePath);
+                textBox1.Text = contenido;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -172,7 +164,6 @@ namespace p_client
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-
         }
     }
 }
