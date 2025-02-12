@@ -152,11 +152,21 @@ namespace p_client
 
         private void textBox1_TextChanged_1(object sender, EventArgs e)
         {
-            if (openFileDialog.FileName != "") //Check if file is selected
+            if (openFileDialog.FileName != "") // Verificamos si se ha seleccionado un archivo
             {
                 string filePath = openFileDialog.FileName;
-                string contenido = File.ReadAllText(filePath);
-                textBox1.Text = contenido;
+                string[] lines = File.ReadAllLines(filePath);
+
+                if (lines.Length > 1)
+                {
+                    // Despues unimos todas las líneas excepto la primera (skip)
+                    string contenido = string.Join(Environment.NewLine, lines.Skip(1));
+                    textBox1.Text = contenido;
+                }
+                else
+                {
+                    textBox1.Text = string.Empty; // Limpiamos el contenido del textbox
+                }
             }
         }
 
