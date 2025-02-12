@@ -32,74 +32,59 @@ namespace p_client
            
         }
 
-        private async Task MonitorConnection()
+        private void MonitorConnection()
         {
             try
             {
                 while (client.Connected)
                 {
-                    // Intentamos leer de la corriente para ver si la conexión sigue activa
-                    byte[] buffer = new byte[1];
-                    try
+                    // Revisamos si la conexión sigue activa
+                    if (!IsConnectionAlive())
                     {
-                        // Si no podemos leer del stream, se ha perdido la conexión
-                        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                        if (bytesRead == 0) // Si no leemos nada, la conexión está cerrada
+                        Invoke((MethodInvoker)delegate
                         {
-                            DisconnectClient();
-                            break;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // Si ocurre una excepción, significa que la conexión se ha perdido
-                        DisconnectClient();
+                            MessageBox.Show("Conexión perdida. Volviendo a Form2.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            this.Close(); // Cerrar Form1
+                            form2.Show(); // Mostrar Form2
+                        });
                         break;
                     }
 
-                    // Espera un poco antes de volver a verificar
-                    await Task.Delay(1000); // 1 segundo de espera
+                    System.Threading.Thread.Sleep(500); // Esperamos medio segundo antes de volver a verificar
                 }
             }
             catch (Exception ex)
             {
-                // Si algo falla, desconectamos de forma segura
-                DisconnectClient();
+                // En caso de error en la verificación, cerramos la conexión y mostramos el mensaje
+                Invoke((MethodInvoker)delegate
+                {
+                    MessageBox.Show($"Error en la conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.Close();
+                    form2.Show();
+                });
             }
         }
 
-        private void DisconnectClient()
+        private bool IsConnectionAlive()
         {
             try
             {
-                // Enviar un mensaje de desconexión (opcional)
-                if (stream != null)
+                // Intentar leer un byte del stream para verificar si la conexión sigue activa
+                if (stream.CanRead)
                 {
-                    string disconnectMessage = "Cliente desconectado";
-                    byte[] data = Encoding.ASCII.GetBytes(disconnectMessage);
-                    stream.Write(data, 0, data.Length);
-                    stream.Flush();
+                    byte[] buffer = new byte[1];
+                    stream.Read(buffer, 0, buffer.Length);
+                    return true; // Si podemos leer, la conexión está activa
                 }
-
-                // Cerrar todo de forma segura
-                if (client != null)
-                {
-                    stream.Close();
-                    client.Close();
-                }
-
-                // Actualizar la interfaz de usuario
-                this.Invoke((MethodInvoker)delegate
-                {
-                    form2.Show(); // Regresar al formulario principal
-                    this.Close();  // Cerrar el formulario actual
-                });
+                return false; // Si no podemos leer, la conexión está cerrada
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Error al desconectar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false; // En caso de excepción, asumimos que la conexión está cerrada
             }
         }
+
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -108,6 +93,7 @@ namespace p_client
             // Iniciar la tarea para monitorear la conexión
             monitorConnectionTask = Task.Run(() => MonitorConnection());
         }
+
 
 
         private void label1_Click(object sender, EventArgs e)
