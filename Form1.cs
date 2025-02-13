@@ -135,10 +135,47 @@ namespace p_client
             }
         }
 
-        private void SendFile(string filePath)
+        private async void SendFile(string filePath)
         {
             byte[] fileData = File.ReadAllBytes(filePath);
-            stream.Write(fileData, 0, fileData.Length);
+            await stream.WriteAsync(fileData, 0, fileData.Length);
+
+            // Esperar la respuesta del servidor
+            byte[] buffer = new byte[1024];
+            int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+            string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+            // Procesar la respuesta del servidor
+            string[] responseParts = response.Split('|');
+            if (responseParts.Length >= 7 && responseParts[0] == "SOLICITUD_TERMINADA")
+            {
+                int queueNumber = int.Parse(responseParts[1]);
+                int quantums = int.Parse(responseParts[2]);
+                int operationsProcessed = int.Parse(responseParts[3]);
+                int initialQueueNumber = int.Parse(responseParts[4]);
+                string algorithm = responseParts[5];
+                string fileContent = responseParts[6];
+
+                // Mostrar la respuesta en textBox3
+                Invoke((MethodInvoker)delegate
+                {
+                    textBox3.Text = $"Número en la cola: {queueNumber}\n" +
+                                    $"Tiempo en quantums: {quantums}\n" +
+                                    $"Operaciones procesadas: {operationsProcessed}\n" +
+                                    $"Número inicial en la cola: {initialQueueNumber}\n" +
+                                    $"Algoritmo aplicado: {algorithm}\n" +
+                                    $"Contenido del archivo: {fileContent}";
+                });
+            }
+            else
+            {
+                // Mostrar la respuesta en textBox3
+                Invoke((MethodInvoker)delegate
+                {
+                    textBox3.Text = response;
+                });
+            }
+
             MessageBox.Show("Archivo enviado", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -180,6 +217,10 @@ namespace p_client
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
         {
         }
     }
